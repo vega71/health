@@ -172,6 +172,94 @@
   }
   .empty-state .icon { font-size: 52px; margin-bottom: 12px; }
 
+  /* History detail modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.45); align-items: flex-end; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff; width: 100%; max-height: 85vh;
+    border-radius: 20px 20px 0 0; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 18px 12px; border-bottom: 1px solid var(--gray-200);
+    flex-shrink: 0;
+  }
+  .modal-title { font-size: 17px; font-weight: 700; color: var(--gray-800); }
+  .modal-close {
+    background: var(--gray-100); border: none; border-radius: 50%;
+    width: 32px; height: 32px; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; color: var(--gray-600);
+  }
+  .modal-body { overflow-y: auto; padding: 14px 18px; flex: 1; }
+  .modal-footer {
+    padding: 12px 18px calc(12px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--gray-200); flex-shrink: 0;
+  }
+  .delete-btn {
+    width: 100%; padding: 14px; border: 1.5px solid #E24B4A; border-radius: var(--radius);
+    background: #fff; color: #E24B4A; font-size: 16px; font-weight: 600;
+    cursor: pointer; font-family: inherit; display: flex; align-items: center;
+    justify-content: center; gap: 7px;
+  }
+  .delete-btn:active { background: #FCEBEB; }
+  .modal-section-title {
+    font-size: 13px; font-weight: 700; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--gray-400);
+    display: flex; align-items: center; gap: 6px;
+    margin: 14px 0 8px;
+  }
+  .modal-section-title:first-child { margin-top: 0; }
+  .modal-ex-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 0; border-bottom: 1px solid var(--gray-100);
+    font-size: 15px;
+  }
+  .modal-ex-row:last-child { border-bottom: none; }
+  .modal-ex-name { color: var(--gray-600); }
+  .modal-ex-val { font-weight: 600; color: var(--gray-800); }
+  .modal-time-label {
+    font-size: 13px; font-weight: 700; color: var(--gray-400);
+    margin: 12px 0 6px; display: flex; align-items: center; gap: 5px;
+  }
+  .modal-note {
+    background: var(--gray-50); border-radius: var(--radius-sm);
+    padding: 10px 12px; font-size: 14px; color: var(--gray-600);
+    margin-top: 6px; border: 1px solid var(--gray-200);
+  }
+  .no-data { font-size: 14px; color: var(--gray-400); padding: 8px 0; }
+
+  /* Confirm dialog */
+  .confirm-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.5); align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .confirm-overlay.open { display: flex; }
+  .confirm-box {
+    background: #fff; border-radius: var(--radius); padding: 24px 20px 20px;
+    width: 100%; max-width: 320px; text-align: center;
+  }
+  .confirm-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--gray-800); }
+  .confirm-desc { font-size: 14px; color: var(--gray-400); margin-bottom: 20px; line-height: 1.5; }
+  .confirm-btns { display: flex; gap: 10px; }
+  .confirm-cancel {
+    flex: 1; padding: 13px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm);
+    background: #fff; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; color: var(--gray-600);
+  }
+  .confirm-ok {
+    flex: 1; padding: 13px; border: none; border-radius: var(--radius-sm);
+    background: #E24B4A; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+
+  /* Hist date clickable */
+  .hist-date { cursor: pointer; }
+  .hist-date:active { background: var(--gray-200); }
+  .hist-date-arrow { font-size: 13px; color: var(--gray-400); }
+
   /* Toast */
   .toast {
     position: fixed; bottom: calc(70px + var(--safe-bottom)); left: 50%;
@@ -246,6 +334,33 @@
     </div>
   </div>
   <div id="historyView" style="display:none; padding-bottom:20px"></div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle"></span>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="delete-btn" onclick="confirmDelete()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        이 날 기록 삭제
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-title">기록을 삭제할까요?</div>
+    <div class="confirm-desc" id="confirmDesc"></div>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" onclick="closeConfirm()">취소</button>
+      <button class="confirm-ok" onclick="doDelete()">삭제</button>
+    </div>
+  </div>
 </div>
 
 <div class="bottom-nav">
@@ -438,7 +553,12 @@ function renderHistory() {
     const days = ['일','월','화','수','목','금','토'];
     const label = `${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
     const todayMark = (k === dateKey(new Date())) ? ' 🟢 오늘' : '';
-    html += `<div class="hist-item"><div class="hist-date">${label}${todayMark}</div><div class="hist-body">`;
+    html += `<div class="hist-item">
+      <div class="hist-date" onclick="openModal('${k}')">
+        <span>${label}${todayMark}</span>
+        <span class="hist-date-arrow">상세 ›</span>
+      </div>
+      <div class="hist-body">`;
 
     let hasAny = false;
     ['morning','afternoon','evening'].forEach(t => {
@@ -461,9 +581,8 @@ function renderHistory() {
       if (sItems.length > 0) { html += `<span class="hist-badge badge-strength">${tLabel} ${sItems.join(' · ')}</span> `; hasAny = true; }
     });
 
-    if (!hasAny) html += `<span style="font-size:12px;color:#868E96">기록 없음</span>`;
+    if (!hasAny) html += `<span style="font-size:13px;color:#868E96">기록 없음</span>`;
 
-    // Notes
     ['morning','afternoon','evening'].forEach(t => {
       const note = dayRec[t]?._note;
       if (note) {
@@ -476,6 +595,91 @@ function renderHistory() {
   });
 
   document.getElementById('historyView').innerHTML = html;
+}
+
+let modalDateKey = null;
+
+function openModal(k) {
+  modalDateKey = k;
+  const dayRec = records[k] || {};
+  const d = new Date(k + 'T00:00:00');
+  const days = ['일','월','화','수','목','금','토'];
+  const label = `${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+  document.getElementById('modalTitle').textContent = label;
+
+  const timeLabels = {morning:'☀️ 오전', afternoon:'🌤 오후', evening:'🌙 저녁'};
+  let html = '';
+
+  ['morning','afternoon','evening'].forEach(t => {
+    const tr = dayRec[t];
+    let cardioRows = '', strengthRows = '', hasCardio = false, hasStrength = false;
+
+    EXERCISES.cardio.forEach(ex => {
+      const v = tr?.[ex.id];
+      if (!v) return;
+      if (ex.id === 'steps' && v.count > 0) {
+        cardioRows += `<div class="modal-ex-row"><span class="modal-ex-name">${ex.name}</span><span class="modal-ex-val">${v.count.toLocaleString()} 걸음</span></div>`;
+        hasCardio = true;
+      } else if (v.min > 0) {
+        cardioRows += `<div class="modal-ex-row"><span class="modal-ex-name">${ex.name}</span><span class="modal-ex-val">${v.min} 분</span></div>`;
+        hasCardio = true;
+      }
+    });
+    EXERCISES.strength.forEach(ex => {
+      const v = tr?.[ex.id];
+      if (!v) return;
+      if (v.sets > 0 || v.reps > 0) {
+        strengthRows += `<div class="modal-ex-row"><span class="modal-ex-name">${ex.name}</span><span class="modal-ex-val">${v.sets||0}세트 × ${v.reps||0}회</span></div>`;
+        hasStrength = true;
+      }
+    });
+
+    if (!hasCardio && !hasStrength && !tr?._note) return;
+
+    html += `<div class="modal-time-label">${timeLabels[t]}</div>`;
+    if (hasCardio) {
+      html += `<div class="modal-section-title"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block"></span>유산소</div>${cardioRows}`;
+    }
+    if (hasStrength) {
+      html += `<div class="modal-section-title"><span style="width:8px;height:8px;border-radius:50%;background:var(--purple);display:inline-block"></span>근육강화</div>${strengthRows}`;
+    }
+    if (tr?._note) {
+      html += `<div class="modal-note">💬 ${tr._note}</div>`;
+    }
+  });
+
+  if (!html) html = `<div class="no-data">이 날은 기록된 운동이 없어요.</div>`;
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function confirmDelete() {
+  if (!modalDateKey) return;
+  const d = new Date(modalDateKey + 'T00:00:00');
+  const days = ['일','월','화','수','목','금','토'];
+  const label = `${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+  document.getElementById('confirmDesc').textContent = `${label}의 모든 운동 기록이 삭제됩니다.`;
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('open');
+}
+function doDelete() {
+  if (!modalDateKey) return;
+  delete records[modalDateKey];
+  persist();
+  closeConfirm();
+  closeModalDirect();
+  renderHistory();
+  showToast('삭제되었습니다');
+  modalDateKey = null;
 }
 
 function renderAll() {
